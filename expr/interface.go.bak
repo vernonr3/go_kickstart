@@ -1,0 +1,42 @@
+package expr
+
+import (
+	"fmt"
+	//"goa.design/model/expr"
+)
+
+type (
+	// Component represents a component.
+	Interface struct {
+		*Element
+		//Methods   Methods	 // what it contains
+		Component *Component // pointer to "pseudo-parent
+	}
+
+	// Components is a slice of components that can be easily converted into
+	// a slice of ElementHolder.
+	Interfaces []*Interface
+)
+
+// EvalName returns the generic expression name used in error messages.
+func (i *Interface) EvalName() string {
+	if i.Name == "" {
+		return "unnamed component"
+	}
+	return fmt.Sprintf("component %q", i.Name)
+}
+
+// Finalize adds the 'Component' tag ands finalizes relationships.
+func (i *Interface) Finalize() {
+	i.PrefixTags("Element", "Component")
+	i.Element.Finalize()
+}
+
+// Elements returns a slice of ElementHolder that contains the elements of c.
+func (is Interfaces) Elements() []ElementHolder {
+	res := make([]ElementHolder, len(is))
+	for i, ii := range is {
+		res[i] = ii
+	}
+	return res
+}
