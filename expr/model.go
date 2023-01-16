@@ -10,10 +10,10 @@ import (
 type (
 	// Model describes a software architecture model.
 	Model struct {
-		Enterprise string
-		People     People
-		Systems    SoftwareSystems
-		//		DeploymentNodes         []*DeploymentNode
+		Enterprise              string
+		People                  People
+		Systems                 SoftwareSystems
+		DeploymentNodes         []*DeploymentNode
 		AddImpliedRelationships bool
 	}
 )
@@ -28,6 +28,10 @@ func Parent(eh ElementHolder) ElementHolder {
 		return e.System
 	case *Component:
 		return e.Container
+	case *Struct:
+		return e.Component
+	case *Interface:
+		return e.Component
 	default:
 		panic(fmt.Sprintf("unknown element type %T", e)) // bug
 	}
@@ -157,7 +161,6 @@ func (m *Model) SoftwareSystem(name string) *SoftwareSystem {
 	return nil
 }
 
-/*
 // DeploymentNode returns the deployment node with the given name if any, nil
 // otherwise.
 func (m *Model) DeploymentNode(env, name string) *DeploymentNode {
@@ -167,7 +170,7 @@ func (m *Model) DeploymentNode(env, name string) *DeploymentNode {
 		}
 	}
 	return nil
-}*/
+}
 
 // FindElement finds the element with the given path in the given scope. The path must be one of:
 //
@@ -298,7 +301,6 @@ func (m *Model) AddSystem(s *SoftwareSystem) *SoftwareSystem {
 	return existing
 }
 
-/*
 // AddDeploymentNode adds the given deployment node to the model. If there is
 // already a deployment node with the given name then AddDeploymentNode merges
 // both definitions. The merge algorithm:
@@ -329,7 +331,7 @@ func (m *Model) AddDeploymentNode(d *DeploymentNode) *DeploymentNode {
 	}
 	return existing
 }
-*/
+
 // addImpliedRelationships adds relationships from src to element with ID destID
 // and its parents (container system software and component container) based on
 // the properties of existing. It only adds a relationship if one doesn't

@@ -6,34 +6,35 @@ import (
 )
 
 type (
-	// Component represents a component.
-	Struct struct {
+	// Method represents a method.
+	Method struct {
 		*Element
-		//Methods   Methods	 // what it contains
-		Component *Component // pointer to "pseudo-parent
+		//Parameters  Parameters	 // what it contains
+		Struct    *Struct    // pointer to "pseudo-parent
+		Interface *Interface // pointer to "pseudo-parent
 	}
 
 	// Components is a slice of components that can be easily converted into
 	// a slice of ElementHolder.
-	Structs []*Struct
+	Methods []*Method
 )
 
 // EvalName returns the generic expression name used in error messages.
-func (s *Struct) EvalName() string {
+func (s *Method) EvalName() string {
 	if s.Name == "" {
-		return "unnamed component"
+		return "unnamed method"
 	}
-	return fmt.Sprintf("component %q", s.Name)
+	return fmt.Sprintf("method %q", s.Name)
 }
 
 // Finalize adds the 'Component' tag ands finalizes relationships.
-func (s *Struct) Finalize() {
-	s.PrefixTags("Element", "Component")
+func (s *Method) Finalize() {
+	s.PrefixTags("Element", "Method")
 	s.Element.Finalize()
 }
 
 // Elements returns a slice of ElementHolder that contains the elements of c.
-func (cs Structs) Elements() []ElementHolder {
+func (cs Methods) Elements() []ElementHolder {
 	res := make([]ElementHolder, len(cs))
 	for i, cc := range cs {
 		res[i] = cc

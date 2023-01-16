@@ -2,10 +2,12 @@ package expr
 
 import (
 	"fmt"
-	"go_kickstart/pkg"
 
 	"goa.design/goa/v3/eval"
 	"goa.design/goa/v3/expr"
+
+	//model "goa.design/model/pkg"
+	model "go_kickstart/pkg"
 )
 
 type (
@@ -15,12 +17,12 @@ type (
 		Description string
 		Version     string
 		Model       *Model
-		//Views       *Views
+		Views       *Views
 	}
 )
 
 // Root is the design root expression.
-var Root = &Design{Model: &Model{}} //, Views: &Views{}}
+var Root = &Design{Model: &Model{}, Views: &Views{}}
 
 // Register design root with eval engine.
 func init() {
@@ -48,10 +50,21 @@ func (d *Design) WalkSets(walk eval.SetWalker) {
 			walk(eval.ToExpressionSet(c.Components))
 		}
 	}
+	// 6. Structs & Interfaces
+	for _, s := range d.Model.Systems {
+		for _, c := range s.Containers {
+			for _, d := range c.Components {
+				walk(eval.ToExpressionSet(d.Structs))
+				walk(eval.ToExpressionSet(d.Interfaces))
+			}
+
+		}
+	}
+	// 7. Methods
 	// 6. Deployment environments
-	//walkDeploymentNodes(d.Model.DeploymentNodes, walk)
+	walkDeploymentNodes(d.Model.DeploymentNodes, walk)
 	// 7. Views
-	//walk([]eval.Expression{d.Views})
+	walk([]eval.Expression{d.Views})
 }
 
 // Packages returns the import path to the Go packages that make
@@ -59,10 +72,10 @@ func (d *Design) WalkSets(walk eval.SetWalker) {
 // in these packages when computing the location of errors.
 func (d *Design) Packages() []string {
 	return []string{
-		"go_kickstart/expr",
-		"go_kickstart/dsl",
-		fmt.Sprintf("go_kickstart@%s/expr", pkg.Version()),
-		fmt.Sprintf("go_kickstart@%s/dsl", pkg.Version()),
+		"goa.design/model/expr",
+		"goa.design/model/dsl",
+		fmt.Sprintf("goa.design/model@%s/expr", model.Version()),
+		fmt.Sprintf("goa.design/model@%s/dsl", model.Version()),
 	}
 }
 
@@ -72,7 +85,6 @@ func (d *Design) DependsOn() []eval.Root { return []eval.Root{expr.Root} }
 // EvalName returns the generic expression name used in error messages.
 func (d *Design) EvalName() string { return "root" }
 
-/*
 func walkDeploymentNodes(n []*DeploymentNode, walk eval.SetWalker) {
 	if n == nil {
 		return
@@ -83,7 +95,7 @@ func walkDeploymentNodes(n []*DeploymentNode, walk eval.SetWalker) {
 		walk(eval.ToExpressionSet(d.ContainerInstances))
 		walkDeploymentNodes(d.Children, walk)
 	}
-}*/
+}
 
 // Person returns the person with the given name if any, nil otherwise.
 func (d *Design) Person(name string) *Person {
@@ -98,8 +110,6 @@ func (d *Design) SoftwareSystem(name string) *SoftwareSystem {
 
 // DeploymentNode returns the deployment node with the given name in the given
 // environment if any, nil otherwise.
-/*
 func (d *Design) DeploymentNode(env, name string) *DeploymentNode {
 	return d.Model.DeploymentNode(env, name)
 }
-*/

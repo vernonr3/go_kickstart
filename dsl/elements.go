@@ -6,7 +6,9 @@ import (
 
 	"goa.design/goa/v3/eval"
 	goaexpr "goa.design/goa/v3/expr"
-	"goa.design/model/expr"
+
+	//"goa.design/model/expr"
+	"go_kickstart/expr"
 )
 
 // SoftwareSystem defines a software system.

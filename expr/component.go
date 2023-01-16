@@ -2,14 +2,16 @@ package expr
 
 import (
 	"fmt"
+	"strings"
 )
 
 type (
-	// Struct represents a Struct.
+	// Component represents a component.
 	Component struct {
-		Element
-		//Structs   Structs
-		Container *Container
+		*Element
+		Structs    []*Struct
+		Interfaces []*Interface
+		Container  *Container
 	}
 
 	// Components is a slice of components that can be easily converted into
@@ -40,7 +42,6 @@ func (cs Components) Elements() []ElementHolder {
 	return res
 }
 
-/*
 // Component returns the component with the given name if any, nil otherwise.
 func (c *Component) Struct(name string) *Struct {
 	for _, cc := range c.Structs {
@@ -51,14 +52,14 @@ func (c *Component) Struct(name string) *Struct {
 	return nil
 }
 
-// AddComponent adds the given component to the container. If there is already a
-// component with the given name then AddComponent merges both definitions. The
+// AddStruct adds the given structt to the component. If there is already a
+// struct with the given name then AddStruct merges both definitions. The
 // merge algorithm:
 //
 //   - overrides the description, technology and URL if provided,
 //   - merges any new tag or propery into the existing tags and properties,
 //
-// AddComponent returns the new or merged component.
+// AddStruct returns the new or merged struct.
 func (c *Component) AddStruct(cmp *Struct) *Struct {
 	existing := c.Struct(cmp.Name)
 	if existing == nil {
@@ -81,4 +82,44 @@ func (c *Component) AddStruct(cmp *Struct) *Struct {
 	}
 	return existing
 }
-*/
+
+// Component returns the component with the given name if any, nil otherwise.
+func (c *Component) Interface(name string) *Interface {
+	for _, cc := range c.Interfaces {
+		if cc.Name == name {
+			return cc
+		}
+	}
+	return nil
+}
+
+// AddInterface adds the given interface to the component. If there is already a
+// struct with the given name then AddInterface merges both definitions. The
+// merge algorithm:
+//
+//   - overrides the description, technology and URL if provided,
+//   - merges any new tag or propery into the existing tags and properties,
+//
+// AddInterface returns the new or merged struct.
+func (c *Component) AddInterface(cmp *Interface) *Interface {
+	existing := c.Interface(cmp.Name)
+	if existing == nil {
+		Identify(cmp)
+		c.Interfaces = append(c.Interfaces, cmp)
+		return cmp
+	}
+	if cmp.Description != "" {
+		existing.Description = cmp.Description
+	}
+	if cmp.Technology != "" {
+		existing.Technology = cmp.Technology
+	}
+	if cmp.URL != "" {
+		existing.URL = cmp.URL
+	}
+	existing.MergeTags(strings.Split(cmp.Tags, ",")...)
+	if olddsl := existing.DSLFunc; olddsl != nil {
+		existing.DSLFunc = func() { olddsl(); cmp.DSLFunc() }
+	}
+	return existing
+}

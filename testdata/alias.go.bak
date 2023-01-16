@@ -1,0 +1,25 @@
+//
+// Data types
+//
+// Command:
+// goa
+
+package testdata
+
+import (
+	"unicode/utf8"
+
+	goa "goa.design/goa/v3/pkg"
+)
+
+type Alias string
+
+// ValidateAlias runs the validations defined on Alias
+// ValidateAlias runs the validations defined on Alias
+func ValidateAlias(v Alias) (err error) {
+	//func Alias() {
+	if utf8.RuneCountInString(string(v)) < 10 {
+		err = goa.MergeErrors(err, goa.InvalidLengthError("v", string(v), utf8.RuneCountInString(string(v)), 10, true))
+	}
+	return
+}

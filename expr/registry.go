@@ -53,19 +53,33 @@ func Identify(element interface{}) {
 	case *Component:
 		e.ID = idify(e.Container.ID + ":" + e.Name)
 		Registry[e.ID] = e
-		/*	case *DeploymentNode:
-				prefix := "dn:" + e.Environment + ":"
-				for f := e.Parent; f != nil; f = f.Parent {
-					prefix += f.ID + ":"
-				}
-				e.ID = idify(prefix + e.Name)
-				Registry[e.ID] = e
-			case *InfrastructureNode:
-				e.ID = idify(e.Environment + ":" + e.Parent.ID + ":" + e.Name)
-				Registry[e.ID] = e
-			case *ContainerInstance:
-				e.ID = idify(e.Environment + ":" + e.Parent.ID + ":" + e.ContainerID)
-				Registry[e.ID] = e*/
+	case *Struct:
+		e.ID = idify(e.Component.ID + ":" + e.Name)
+		Registry[e.ID] = e
+	case *Interface:
+		e.ID = idify(e.Component.ID + ":" + e.Name)
+		Registry[e.ID] = e
+	case *Method:
+		if e.Struct != nil {
+			e.ID = idify(e.Struct.ID + ":" + e.Name)
+		}
+		if e.Interface != nil {
+			e.ID = idify(e.Interface.ID + ":" + e.Name)
+		}
+		Registry[e.ID] = e
+	case *DeploymentNode:
+		prefix := "dn:" + e.Environment + ":"
+		for f := e.Parent; f != nil; f = f.Parent {
+			prefix += f.ID + ":"
+		}
+		e.ID = idify(prefix + e.Name)
+		Registry[e.ID] = e
+	case *InfrastructureNode:
+		e.ID = idify(e.Environment + ":" + e.Parent.ID + ":" + e.Name)
+		Registry[e.ID] = e
+	case *ContainerInstance:
+		e.ID = idify(e.Environment + ":" + e.Parent.ID + ":" + e.ContainerID)
+		Registry[e.ID] = e
 	case *Relationship:
 		var dest string
 		if e.Destination != nil {
