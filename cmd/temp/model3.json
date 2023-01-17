@@ -1,0 +1,96 @@
+{
+    "name": "Getting Started",
+    "description": "This is a model of vernon's software system.",
+    "model": {
+        "softwareSystems": [
+            {
+                "id": "122st75",
+                "name": "Software System",
+                "description": "Vernon's software system.",
+                "tags": "Element,Software System",
+                "containers": [
+                    {
+                        "id": "1dfx13a",
+                        "name": "KMContainer",
+                        "description": "KM container with real content",
+                        "technology": "docker \u0026 golang",
+                        "tags": "Element,Container",
+                        "components": [
+                            {
+                                "id": "16z4226",
+                                "name": "KM component",
+                                "description": "A custom component",
+                                "technology": "Go and Python",
+                                "tags": "Element,Component",
+                                "Structs": [
+                                    {
+                                        "id": "1wr1mpl",
+                                        "name": "KM Struct",
+                                        "description": "A custom struct",
+                                        "technology": "Go only",
+                                        "tags": "Element,Component",
+                                        "Methods": [
+                                            {
+                                                "id": "16320tc",
+                                                "name": "KM method",
+                                                "description": "Means of introspection",
+                                                "technology": "Go only",
+                                                "tags": "Element,Method",
+                                                "InputParameters": [
+                                                    {
+                                                        "id": "1kxj75h",
+                                                        "name": "IVar1",
+                                                        "type": "int64"
+                                                    }
+                                                ],
+                                                "ReturnParameters": [
+                                                    {
+                                                        "id": "3pdmau",
+                                                        "type": "bool"
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ],
+                                "Interfaces": [
+                                    {
+                                        "id": "63324j",
+                                        "name": "KM Interface",
+                                        "description": "A custom interface",
+                                        "technology": "Go only",
+                                        "tags": "Element,Interface",
+                                        "Methods": [
+                                            {
+                                                "id": "3g8wt6",
+                                                "name": "KM method",
+                                                "description": "Means of reflection",
+                                                "technology": "Go only",
+                                                "tags": "Element,Method",
+                                                "InputParameters": [
+                                                    {
+                                                        "id": "rgk8b2",
+                                                        "name": "Var1",
+                                                        "type": "string"
+                                                    }
+                                                ],
+                                                "ReturnParameters": [
+                                                    {
+                                                        "id": "17y60m4",
+                                                        "name": "retval",
+                                                        "type": "bool"
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    "views": {}
+}

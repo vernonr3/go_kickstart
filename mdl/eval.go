@@ -244,6 +244,25 @@ func modelizeMethods(cs []*expr.Method) []*Method {
 	res := make([]*Method, len(cs))
 	for i, c := range cs {
 		res[i] = &Method{
+			ID:               c.ID,
+			Name:             c.Name,
+			Description:      c.Description,
+			Technology:       c.Technology,
+			Tags:             c.Tags,
+			URL:              c.URL,
+			Properties:       c.Properties,
+			Relationships:    modelizeRelationships(c.Relationships),
+			InputParameters:  modelizeInputParameters(c.InputParameters),
+			ReturnParameters: modelizeReturnParameters(c.ReturnParameters),
+		}
+	}
+	return res
+}
+
+func modelizeInputParameters(cs []*expr.InputParameter) []*InputParameter {
+	res := make([]*InputParameter, len(cs))
+	for i, c := range cs {
+		res[i] = &InputParameter{
 			ID:            c.ID,
 			Name:          c.Name,
 			Description:   c.Description,
@@ -252,7 +271,23 @@ func modelizeMethods(cs []*expr.Method) []*Method {
 			URL:           c.URL,
 			Properties:    c.Properties,
 			Relationships: modelizeRelationships(c.Relationships),
-			//Parameters:       modelizeParameters(c.Parameters),
+		}
+	}
+	return res
+}
+
+func modelizeReturnParameters(cs []*expr.ReturnParameter) []*ReturnParameter {
+	res := make([]*ReturnParameter, len(cs))
+	for i, c := range cs {
+		res[i] = &ReturnParameter{
+			ID:            c.ID,
+			Name:          c.Name,
+			Description:   c.Description,
+			Technology:    c.Technology,
+			Tags:          c.Tags,
+			URL:           c.URL,
+			Properties:    c.Properties,
+			Relationships: modelizeRelationships(c.Relationships),
 		}
 	}
 	return res

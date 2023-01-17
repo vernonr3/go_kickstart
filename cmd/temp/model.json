@@ -1,4 +1,51 @@
 {
-    "name": "",
-    "model": {}
+    "name": "Getting Started",
+    "description": "This is a model of vernon's software system.",
+    "model": {
+        "softwareSystems": [
+            {
+                "id": "122st75",
+                "name": "Software System",
+                "description": "Vernon's software system.",
+                "tags": "Element,Software System",
+                "containers": [
+                    {
+                        "id": "1dfx13a",
+                        "name": "KMContainer",
+                        "description": "KM container with real content",
+                        "technology": "docker \u0026 golang",
+                        "tags": "Element,Container",
+                        "components": [
+                            {
+                                "id": "16z4226",
+                                "name": "KM component",
+                                "description": "A custom component",
+                                "technology": "Go and Python",
+                                "tags": "Element,Component",
+                                "Structs": [
+                                    {
+                                        "id": "1wr1mpl",
+                                        "name": "KM Struct",
+                                        "description": "A custom struct",
+                                        "technology": "Go only",
+                                        "Methods": null
+                                    }
+                                ],
+                                "Interfaces": [
+                                    {
+                                        "id": "63324j",
+                                        "name": "KM Interface",
+                                        "description": "A custom interface",
+                                        "technology": "Go only",
+                                        "Methods": null
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    "views": {}
 }

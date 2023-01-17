@@ -5,8 +5,9 @@ package design
 import . "go_kickstart/dsl"
 
 /*
-uses nesting to the level envisaged in the DSL created for the model..
-Next stage is to extend this beyond into the levels I want..
+Nesting to the level envisaged in the DSL created for the model..
+Extended to include the struct, interface and method levels..
+doesn't include parameters
 */
 
 var _ = Design("Getting Started", "This is a model of vernon's software system.", func() {

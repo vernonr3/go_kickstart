@@ -153,3 +153,101 @@ func Method(name string, args ...interface{}) *expr.Method {
 	}
 	return nil
 }
+
+// Method defines a golang method.
+//
+// Method must appear in a Struct, Interface or component expression.
+//
+// Method takes 1 to 3 arguments. The first argument is the method
+// name and the last argument a function that contains the expressions
+// that defines the parameters of the method. An optional description may be given
+// after the name.
+//
+// The valid syntax for Method is thus:
+//
+//	Method("<name>")
+//
+//	Method("<name>", "[description]")
+//
+//	Method("<name>", func())
+//
+//	Method("<name>", "[description]", func())
+func InputParameter(name string, args ...interface{}) *expr.InputParameter {
+	var bIsStruct bool = false
+	//var bIsInterface bool = false
+	var method *expr.Method
+	//var minterface *expr.Interface
+	var ok bool
+	method, ok = eval.Current().(*expr.Method)
+	if ok {
+		bIsStruct = true
+	} else {
+		fmt.Printf("InputParameter not in correct context\n")
+	}
+
+	if !ok {
+		eval.IncompatibleDSL()
+		return nil
+	}
+	if strings.Contains(name, "/") {
+		eval.ReportError("InputParameter: name cannot include slashes")
+	}
+	description, technology, dsl, err := parseElementArgs(args...)
+	if err != nil {
+		eval.ReportError("InputParameter: " + err.Error())
+		return nil
+	}
+	if bIsStruct {
+		c := &expr.InputParameter{
+			Element: &expr.Element{
+				Name:        name,
+				Description: description,
+				Technology:  technology,
+				DSLFunc:     dsl,
+			},
+			Method: method,
+		}
+		return method.AddInputParameter(c)
+	}
+	return nil
+}
+
+func ReturnParameter(name string, args ...interface{}) *expr.ReturnParameter {
+	var bIsStruct bool = false
+	//var bIsInterface bool = false
+	var method *expr.Method
+	//var minterface *expr.Interface
+	var ok bool
+	method, ok = eval.Current().(*expr.Method)
+	if ok {
+		bIsStruct = true
+	} else {
+		fmt.Printf("ReturnParameter not in correct context\n")
+	}
+
+	if !ok {
+		eval.IncompatibleDSL()
+		return nil
+	}
+	if strings.Contains(name, "/") {
+		eval.ReportError("ReturnParameter: name cannot include slashes")
+	}
+	description, technology, dsl, err := parseElementArgs(args...)
+	if err != nil {
+		eval.ReportError("ReturnParameter: " + err.Error())
+		return nil
+	}
+	if bIsStruct {
+		c := &expr.ReturnParameter{
+			Element: &expr.Element{
+				Name:        name,
+				Description: description,
+				Technology:  technology,
+				DSLFunc:     dsl,
+			},
+			Method: method,
+		}
+		return method.AddReturnParameter(c)
+	}
+	return nil
+}

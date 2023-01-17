@@ -13,7 +13,7 @@ import (
 	//"goa.design/model/mdl"
 	"go_kickstart/mdl"
 	//"model/mdl"
-	_ "go_kickstart/testdata/stage1"
+	_ "go_kickstart/testdata/stage3"
 	"os"
 )
 
