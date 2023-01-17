@@ -59,6 +59,12 @@ func Identify(element interface{}) {
 	case *Interface:
 		e.ID = idify(e.Component.ID + ":" + e.Name)
 		Registry[e.ID] = e
+	case *InputParameter:
+		e.ID = idify(e.Method.ID + ":" + e.Name)
+		Registry[e.ID] = e
+	case *ReturnParameter:
+		e.ID = idify(e.Method.ID + ":" + e.Name)
+		Registry[e.ID] = e
 	case *Method:
 		if e.Struct != nil {
 			e.ID = idify(e.Struct.ID + ":" + e.Name)

@@ -61,6 +61,19 @@ func (d *Design) WalkSets(walk eval.SetWalker) {
 		}
 	}
 	// 7. Methods
+	for _, s := range d.Model.Systems {
+		for _, c := range s.Containers {
+			for _, d := range c.Components {
+				for _, e := range d.Structs {
+					walk(eval.ToExpressionSet(e.Methods))
+				}
+				for _, e := range d.Interfaces {
+					walk(eval.ToExpressionSet(e.Methods))
+				}
+			}
+
+		}
+	}
 	// 6. Deployment environments
 	walkDeploymentNodes(d.Model.DeploymentNodes, walk)
 	// 7. Views
