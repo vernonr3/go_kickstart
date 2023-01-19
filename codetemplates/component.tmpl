@@ -1,0 +1,40 @@
+=======================================================
+component.tmpl
+package {{ .ComponentName }}
+
+import (
+    "fmt"
+)
+
+{{.ComponentName}}
+
+/// display the interfaces
+------------------------------
+interface templates		
+{{range $index,$interfaceTempl := .InterfaceTempls}}{{$interfaceTempl}}{{end}}
+------------------------------
+
+
+// display the structs 
+{{ range $index,$codestruct := .Codestructs }}
+    {{- $codestruct.StructTemplate}}
+//-------------- interface signatures --------------
+{{ range $index2,$intfacecodestruct := $codestruct.InterfaceCodeStructs }}
+{{- $intfacecodestruct.InterfaceSignature}}
+{{end}}
+//-------------- externally accessible method bodies --------------
+    {{ range $index2,$intfacecodestruct := $codestruct.InterfaceCodeStructs }}
+        {{- $intfacecodestruct.ExternalMethods}}
+    {{end}}
+//-------------- internal function signatures --------------
+{{ range $index2,$intsign := $codestruct.InternalMethodSignatures }}
+        {{- $intsign}}
+{{end}}
+//-------------- internal function bodies --------------
+{{ range $index2,$intmethod := $codestruct.InternalMethods }}
+        {{- $intmethod}}
+{{end}}
+//-------------- internal only methods signatures --------------
+{{- $codestruct.StructMethods}}
+
+{{end}}
