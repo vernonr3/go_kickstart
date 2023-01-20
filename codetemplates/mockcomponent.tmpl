@@ -1,0 +1,33 @@
+package {{ .ComponentName }}
+
+import (
+    "fmt"
+    "testing"
+    "github.com/stretchr/testify/assert"
+)
+
+
+{{ range $index,$codestruct := .MockCodeStructs }}
+//-------------- method interface signatures --------------
+{{ range $index2,$intfacecodestruct := $codestruct.InterfaceCodeStructs }}
+{{- $intfacecodestruct.InterfaceSignature}}
+{{end}}
+// display the structs
+{{ $codestruct.MockStructTemplate}}
+//-------------- externally accessible method bodies --------------
+    {{ range $index2,$intfacecodestruct := $codestruct.InterfaceCodeStructs }}
+        {{- $intfacecodestruct.ExternalMethods}}
+    {{end}}
+
+//-------------- spoof method bodies --------------
+{{range $index3,$mockmethod := $codestruct.MockMethods}}
+{{$mockmethod}}
+{{end}}
+
+{{end}}
+
+
+func Test_A(t * testing.T){
+// duplicate filling in calls as required. Adjusting tests..
+ assert.Equal(t,true,true)
+}

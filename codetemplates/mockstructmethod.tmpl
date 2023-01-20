@@ -1,0 +1,7 @@
+{{$structName := .StructName}}
+{{$methodDescriptions := .MethodDescriptions}}
+{{range $index,$methodTempl := .MethodTempls}}
+{{/*$zeroindex :=  sub $index 1 */}}
+// {{$structName}} {{index $methodDescriptions $index}}
+func (m * {{$structName}}) {{$methodTempl}}
+{{end}}

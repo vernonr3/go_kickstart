@@ -1,0 +1,6 @@
+type {{.StructName}} struct {
+    {{range $index,$methodTempl := .MethodTempls}}
+        {{- $methodTempl}}
+    {{end}}
+    // struct variables
+}

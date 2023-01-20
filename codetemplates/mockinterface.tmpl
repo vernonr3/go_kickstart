@@ -1,0 +1,6 @@
+// {{.InterfaceDescrip}}
+type Mock{{.InterfaceName}} interface {
+{{ range $index,$item := .Methods}}
+    {{ $item}}
+{{end }}
+}

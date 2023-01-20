@@ -1,40 +1,45 @@
-=======================================================
-component.tmpl
 package {{ .ComponentName }}
 
 import (
     "fmt"
 )
 
-{{.ComponentName}}
-
-/// display the interfaces
-------------------------------
-interface templates		
-{{range $index,$interfaceTempl := .InterfaceTempls}}{{$interfaceTempl}}{{end}}
-------------------------------
-
-
-// display the structs 
-{{ range $index,$codestruct := .Codestructs }}
-    {{- $codestruct.StructTemplate}}
-//-------------- interface signatures --------------
-{{ range $index2,$intfacecodestruct := $codestruct.InterfaceCodeStructs }}
-{{- $intfacecodestruct.InterfaceSignature}}
+//-------------- functional interface bodies -------------------------
+{{range $index, $interfacecodestruct := .InterfaceCodeStructs}}
+{{- $interfacecodestruct.InterfaceSignature}}
 {{end}}
-//-------------- externally accessible method bodies --------------
-    {{ range $index2,$intfacecodestruct := $codestruct.InterfaceCodeStructs }}
-        {{- $intfacecodestruct.ExternalMethods}}
-    {{end}}
+
+
+{{ range $index,$codestruct := .Codestructs }}
 //-------------- internal function signatures --------------
 {{ range $index2,$intsign := $codestruct.InternalMethodSignatures }}
         {{- $intsign}}
 {{end}}
+// display the structs
+{{ $codestruct.StructTemplate}}
+//-------------- method interface signatures --------------
+{{ range $index2,$intfacecodestruct := $codestruct.InterfaceCodeStructs }}
+{{- $intfacecodestruct.InterfaceSignature}}
+{{end}}
+
+//-------------- externally accessible method bodies --------------
+    {{ range $index2,$intfacecodestruct := $codestruct.InterfaceCodeStructs }}
+        {{- $intfacecodestruct.ExternalMethods}}
+    {{end}}
 //-------------- internal function bodies --------------
 {{ range $index2,$intmethod := $codestruct.InternalMethods }}
         {{- $intmethod}}
 {{end}}
 //-------------- internal only methods signatures --------------
 {{- $codestruct.StructMethods}}
-
+{{end}}
+//-------------- functional interface bodies -------------------------
+{{range $index, $interfacecodestruct := .InterfaceCodeStructs}}
+{{range $index2,$function := $interfacecodestruct.ExternalFunctions}}
+{{- $function}}
+{{end}}
+{{end}}
+//-------------- function bodies -------------------------
+{{range $index, $functiontemplate := .FunctionTemplates}}
+{{- $functiontemplate}}
 {{end}}

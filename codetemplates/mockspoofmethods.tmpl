@@ -1,0 +1,8 @@
+ // ------------------- 
+ mMock{{.StructName}} := NewMock{{.StructName}}()
+ // -------------------
+ {{ range $index, $method := .Methods}}
+ mMock{{.StructName}}.handle{{$method}} = func{{.inputparams}}{{.outputparams}}{
+    return // sort the variables out here
+ }
+ {{end}}
