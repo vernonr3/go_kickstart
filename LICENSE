@@ -1,6 +1,7 @@
 MIT License
 
-Copyright (c) 2023 Kutchman Limited
+Copyright (c) 2023 Kutchman Limited (#2) where not covered by
+Copyright (c) 2020 Raphael Simon, Victor Dramba and Model Contributors (#1) see below for further details
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,3 +20,9 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+The original software from https://github.com/goadesign/model/ is covered
+by the Copyright #1. Copyright #2 covers new portions specifically required
+to deliver the go_kickstart frameworks etc. Files that are prefixed ks are covered
+by Copyright #2. Other files contain and mixture and a diff between the two repositories
+will show the origin and therefore copyright applicable.

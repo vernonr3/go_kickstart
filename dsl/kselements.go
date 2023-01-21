@@ -55,7 +55,22 @@ func Struct(name string, args ...interface{}) *expr.Struct {
 }
 
 func Interface(name string, args ...interface{}) *expr.Interface {
-	component, ok := eval.Current().(*expr.Component)
+	var bIsComponent bool = false
+	var bIsStruct bool = false
+	var mstruct *expr.Struct
+	var mcomponent *expr.Component
+	var ok bool
+	mcomponent, ok = eval.Current().(*expr.Component)
+	if ok {
+		bIsComponent = true
+	} else {
+		mstruct, ok = eval.Current().(*expr.Struct)
+		if ok {
+			bIsStruct = true
+		} else {
+			fmt.Printf("Interface not in correct context\n")
+		}
+	}
 	if !ok {
 		eval.IncompatibleDSL()
 		return nil
@@ -68,21 +83,37 @@ func Interface(name string, args ...interface{}) *expr.Interface {
 		eval.ReportError("Interface: " + err.Error())
 		return nil
 	}
-	c := &expr.Interface{
-		Element: &expr.Element{
-			Name:        name,
-			Description: description,
-			Technology:  technology,
-			DSLFunc:     dsl,
-		},
-		Component: component,
+	if bIsStruct {
+		c := &expr.Interface{
+			Element: &expr.Element{
+				Name:        name,
+				Description: description,
+				Technology:  technology,
+				DSLFunc:     dsl,
+			},
+			Struct: mstruct,
+		}
+		return mstruct.AddInterface(c)
 	}
-	return component.AddInterface(c)
+	if bIsComponent {
+		c := &expr.Interface{
+			Element: &expr.Element{
+				Name:        name,
+				Description: description,
+				Technology:  technology,
+				DSLFunc:     dsl,
+			},
+			Component: mcomponent,
+		}
+		return mcomponent.AddInterface(c)
+	}
+
+	return nil
 }
 
 // Method defines a golang method.
 //
-// Method must appear in a Struct, Interface or component expression.
+// Method must appear in a Struct, Interface expression.
 //
 // Method takes 1 to 3 arguments. The first argument is the method
 // name and the last argument a function that contains the expressions
@@ -154,6 +185,50 @@ func Method(name string, args ...interface{}) *expr.Method {
 	return nil
 }
 
+// Function defines a golang function.
+//
+// Function must appear in a component.
+//
+// Function takes 1 to 3 arguments. The first argument is the Function
+// name and the last argument a function that contains the expressions
+// that defines the content of the Function. An optional description may be given
+// after the name.
+//
+// The valid syntax for Struct is thus:
+//
+//	Function("<name>")
+//
+//	Function("<name>", "[description]")
+//
+//	Function("<name>", func())
+//
+//	Function("<name>", "[description]", func())
+func Function(name string, args ...interface{}) *expr.Function {
+	component, ok := eval.Current().(*expr.Component)
+	if !ok {
+		eval.IncompatibleDSL()
+		return nil
+	}
+	if strings.Contains(name, "/") {
+		eval.ReportError("Function: name cannot include slashes")
+	}
+	description, technology, dsl, err := parseElementArgs(args...)
+	if err != nil {
+		eval.ReportError("Function: " + err.Error())
+		return nil
+	}
+	c := &expr.Function{
+		Element: &expr.Element{
+			Name:        name,
+			Description: description,
+			Technology:  technology,
+			DSLFunc:     dsl,
+		},
+		Component: component,
+	}
+	return component.AddFunction(c)
+}
+
 // Method defines a golang method.
 //
 // Method must appear in a Struct, Interface or component expression.
@@ -173,16 +248,22 @@ func Method(name string, args ...interface{}) *expr.Method {
 //
 //	Method("<name>", "[description]", func())
 func InputParameter(name string, args ...interface{}) *expr.InputParameter {
-	var bIsStruct bool = false
-	//var bIsInterface bool = false
+	var bIsMethod bool = false
+	var bIsFunction bool = false
 	var method *expr.Method
+	var function *expr.Function
 	//var minterface *expr.Interface
 	var ok bool
 	method, ok = eval.Current().(*expr.Method)
 	if ok {
-		bIsStruct = true
+		bIsMethod = true
 	} else {
-		fmt.Printf("InputParameter not in correct context\n")
+		function, ok = eval.Current().(*expr.Function)
+		if ok {
+			bIsFunction = true
+		} else {
+			fmt.Printf("InputParameter not in correct context\n")
+		}
 	}
 
 	if !ok {
@@ -197,7 +278,7 @@ func InputParameter(name string, args ...interface{}) *expr.InputParameter {
 		eval.ReportError("InputParameter: " + err.Error())
 		return nil
 	}
-	if bIsStruct {
+	if bIsMethod {
 		c := &expr.InputParameter{
 			Element: &expr.Element{
 				Name:        name,
@@ -209,20 +290,38 @@ func InputParameter(name string, args ...interface{}) *expr.InputParameter {
 		}
 		return method.AddInputParameter(c)
 	}
+	if bIsFunction {
+		c := &expr.InputParameter{
+			Element: &expr.Element{
+				Name:        name,
+				Description: description,
+				Technology:  technology,
+				DSLFunc:     dsl,
+			},
+			Function: function,
+		}
+		return function.AddInputParameter(c)
+	}
 	return nil
 }
 
 func ReturnParameter(name string, args ...interface{}) *expr.ReturnParameter {
-	var bIsStruct bool = false
-	//var bIsInterface bool = false
+	var bIsMethod bool = false
+	var bIsFunction bool = false
 	var method *expr.Method
-	//var minterface *expr.Interface
+	var function *expr.Function
 	var ok bool
 	method, ok = eval.Current().(*expr.Method)
 	if ok {
-		bIsStruct = true
+		bIsMethod = true
 	} else {
-		fmt.Printf("ReturnParameter not in correct context\n")
+		function, ok = eval.Current().(*expr.Function)
+		if ok {
+			bIsFunction = true
+		} else {
+			fmt.Printf("ReturnParameter not in correct context\n")
+		}
+
 	}
 
 	if !ok {
@@ -237,7 +336,7 @@ func ReturnParameter(name string, args ...interface{}) *expr.ReturnParameter {
 		eval.ReportError("ReturnParameter: " + err.Error())
 		return nil
 	}
-	if bIsStruct {
+	if bIsMethod {
 		c := &expr.ReturnParameter{
 			Element: &expr.Element{
 				Name:        name,
@@ -248,6 +347,18 @@ func ReturnParameter(name string, args ...interface{}) *expr.ReturnParameter {
 			Method: method,
 		}
 		return method.AddReturnParameter(c)
+	}
+	if bIsFunction {
+		c := &expr.ReturnParameter{
+			Element: &expr.Element{
+				Name:        name,
+				Description: description,
+				Technology:  technology,
+				DSLFunc:     dsl,
+			},
+			Function: function,
+		}
+		return function.AddReturnParameter(c)
 	}
 	return nil
 }

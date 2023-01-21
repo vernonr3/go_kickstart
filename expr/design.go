@@ -60,11 +60,12 @@ func (d *Design) WalkSets(walk eval.SetWalker) {
 
 		}
 	}
-	// 7. Methods
+	// 7. Methods & interface inside structs
 	for _, s := range d.Model.Systems {
 		for _, c := range s.Containers {
 			for _, d := range c.Components {
 				for _, e := range d.Structs {
+					walk(eval.ToExpressionSet(e.Interfaces))
 					walk(eval.ToExpressionSet(e.Methods))
 				}
 				for _, e := range d.Interfaces {
@@ -74,9 +75,30 @@ func (d *Design) WalkSets(walk eval.SetWalker) {
 
 		}
 	}
-	// 6. Deployment environments
+	// 7. Methods inside interfaces
+	for _, s := range d.Model.Systems {
+		for _, c := range s.Containers {
+			for _, d := range c.Components {
+				for _, e := range d.Structs {
+					for _, f := range e.Interfaces {
+						walk(eval.ToExpressionSet(f.Methods))
+					}
+				}
+			}
+		}
+	}
+	// 6. Functions
+	for _, s := range d.Model.Systems {
+		for _, c := range s.Containers {
+			for _, d := range c.Components {
+				walk(eval.ToExpressionSet(d.Functions))
+			}
+
+		}
+	}
+	// 9. Deployment environments
 	walkDeploymentNodes(d.Model.DeploymentNodes, walk)
-	// 7. Views
+	// 10. Views
 	walk([]eval.Expression{d.Views})
 }
 

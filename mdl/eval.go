@@ -1,7 +1,11 @@
 package mdl
 
 import (
+	"errors"
+	"fmt"
+
 	"goa.design/goa/v3/eval"
+
 	//	"goa.design/model/expr"
 	"go_kickstart/expr"
 )
@@ -23,11 +27,20 @@ type (
 )
 
 // RunDSL runs the DSL defined in a global variable and returns a JSON serializable version of it.
-func RunDSL() (*Design, error) {
+func RunDSL4JSON() (*Design, error) {
 	if err := eval.RunDSL(); err != nil {
 		return nil, err
 	}
 	return ModelizeDesign(expr.Root), nil
+}
+
+func RunDSL4Code() (*Design, error) {
+	if err := eval.RunDSL(); err != nil {
+		return nil, err
+	}
+	fmt.Printf("Running the code variant\n")
+	CreateCodeFramework(expr.Root)
+	return &Design{}, errors.New("Nothing to do")
 }
 
 func ModelizeDesign(d *expr.Design) *Design {

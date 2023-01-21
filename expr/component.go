@@ -11,6 +11,7 @@ type (
 		*Element
 		Structs    []*Struct
 		Interfaces []*Interface
+		Functions  []*Function
 		Container  *Container
 	}
 
@@ -42,9 +43,19 @@ func (cs Components) Elements() []ElementHolder {
 	return res
 }
 
-// Component returns the component with the given name if any, nil otherwise.
+// Struct returns the struct with the given name if any, nil otherwise.
 func (c *Component) Struct(name string) *Struct {
 	for _, cc := range c.Structs {
+		if cc.Name == name {
+			return cc
+		}
+	}
+	return nil
+}
+
+// Function returns the function with the given name if any, nil otherwise.
+func (c *Component) Function(name string) *Function {
+	for _, cc := range c.Functions {
 		if cc.Name == name {
 			return cc
 		}
@@ -94,7 +105,7 @@ func (c *Component) Interface(name string) *Interface {
 }
 
 // AddInterface adds the given interface to the component. If there is already a
-// struct with the given name then AddInterface merges both definitions. The
+// interface with the given name then AddInterface merges both definitions. The
 // merge algorithm:
 //
 //   - overrides the description, technology and URL if provided,
@@ -106,6 +117,37 @@ func (c *Component) AddInterface(cmp *Interface) *Interface {
 	if existing == nil {
 		Identify(cmp)
 		c.Interfaces = append(c.Interfaces, cmp)
+		return cmp
+	}
+	if cmp.Description != "" {
+		existing.Description = cmp.Description
+	}
+	if cmp.Technology != "" {
+		existing.Technology = cmp.Technology
+	}
+	if cmp.URL != "" {
+		existing.URL = cmp.URL
+	}
+	existing.MergeTags(strings.Split(cmp.Tags, ",")...)
+	if olddsl := existing.DSLFunc; olddsl != nil {
+		existing.DSLFunc = func() { olddsl(); cmp.DSLFunc() }
+	}
+	return existing
+}
+
+// AddFunction adds the given function to the component. If there is already a
+// function with the given name then AddFunction merges both definitions. The
+// merge algorithm:
+//
+//   - overrides the description, technology and URL if provided,
+//   - merges any new tag or propery into the existing tags and properties,
+//
+// AddFunction returns the new or merged function.
+func (c *Component) AddFunction(cmp *Function) *Function {
+	existing := c.Function(cmp.Name)
+	if existing == nil {
+		Identify(cmp)
+		c.Functions = append(c.Functions, cmp)
 		return cmp
 	}
 	if cmp.Description != "" {

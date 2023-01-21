@@ -9,7 +9,8 @@ type (
 	// Method represents a method.
 	InputParameter struct {
 		*Element
-		Method *Method // pointer to "pseudo-parent
+		Method   *Method   // pointer to "pseudo-parent
+		Function *Function // pointer to "pseudo-parent
 	}
 
 	// Components is a slice of components that can be easily converted into

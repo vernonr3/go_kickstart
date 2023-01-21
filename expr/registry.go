@@ -56,14 +56,32 @@ func Identify(element interface{}) {
 	case *Struct:
 		e.ID = idify(e.Component.ID + ":" + e.Name)
 		Registry[e.ID] = e
-	case *Interface:
+	case *Function:
 		e.ID = idify(e.Component.ID + ":" + e.Name)
 		Registry[e.ID] = e
+	case *Interface:
+		if e.Component != nil {
+			e.ID = idify(e.Component.ID + ":" + e.Name)
+		}
+		if e.Struct != nil {
+			e.ID = idify(e.Struct.ID + ":" + e.Name)
+		}
+		Registry[e.ID] = e
 	case *InputParameter:
-		e.ID = idify(e.Method.ID + ":" + e.Name)
+		if e.Method != nil {
+			e.ID = idify(e.Method.ID + ":" + e.Name)
+		}
+		if e.Function != nil {
+			e.ID = idify(e.Function.ID + ":" + e.Name)
+		}
 		Registry[e.ID] = e
 	case *ReturnParameter:
-		e.ID = idify(e.Method.ID + ":" + e.Name)
+		if e.Method != nil {
+			e.ID = idify(e.Method.ID + ":" + e.Name)
+		}
+		if e.Function != nil {
+			e.ID = idify(e.Function.ID + ":" + e.Name)
+		}
 		Registry[e.ID] = e
 	case *Method:
 		if e.Struct != nil {

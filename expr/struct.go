@@ -10,8 +10,9 @@ type (
 	// Component represents a component.
 	Struct struct {
 		*Element
-		Methods   []*Method  // what it contains
-		Component *Component // pointer to "pseudo-parent
+		Methods    []*Method    // what it contains
+		Interfaces []*Interface // what it contains
+		Component  *Component   // pointer to "pseudo-parent
 	}
 
 	// Components is a slice of components that can be easily converted into
@@ -51,6 +52,15 @@ func (s *Struct) Method(name string) *Method {
 	return nil
 }
 
+func (s *Struct) Interface(name string) *Interface {
+	for _, cc := range s.Interfaces {
+		if cc.Name == name {
+			return cc
+		}
+	}
+	return nil
+}
+
 // AddMethod adds the given method to the struct. If there is already a
 // method with the given name then AddMethod merges both definitions. The
 // merge algorithm:
@@ -64,6 +74,37 @@ func (s *Struct) AddMethod(cmp *Method) *Method {
 	if existing == nil {
 		Identify(cmp)
 		s.Methods = append(s.Methods, cmp)
+		return cmp
+	}
+	if cmp.Description != "" {
+		existing.Description = cmp.Description
+	}
+	if cmp.Technology != "" {
+		existing.Technology = cmp.Technology
+	}
+	if cmp.URL != "" {
+		existing.URL = cmp.URL
+	}
+	existing.MergeTags(strings.Split(cmp.Tags, ",")...)
+	if olddsl := existing.DSLFunc; olddsl != nil {
+		existing.DSLFunc = func() { olddsl(); cmp.DSLFunc() }
+	}
+	return existing
+}
+
+// Addinterface adds the given interface to the struct. If there is already a
+// interface with the given name then AddInterface merges both definitions. The
+// merge algorithm:
+//
+//   - overrides the description, technology and URL if provided,
+//   - merges any new tag or propery into the existing tags and properties,
+//
+// AddMethod returns the new or merged method.
+func (s *Struct) AddInterface(cmp *Interface) *Interface {
+	existing := s.Interface(cmp.Name)
+	if existing == nil {
+		Identify(cmp)
+		s.Interfaces = append(s.Interfaces, cmp)
 		return cmp
 	}
 	if cmp.Description != "" {

@@ -12,6 +12,7 @@ type (
 		*Element
 		Methods   Methods    // what it contains
 		Component *Component // pointer to "pseudo-parent
+		Struct    *Struct    // pointer to "pseudo-parent
 	}
 
 	// Components is a slice of components that can be easily converted into

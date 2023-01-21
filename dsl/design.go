@@ -5,10 +5,11 @@ import (
 
 	"goa.design/goa/v3/eval"
 	//"goa.design/model/expr"
+
 	"go_kickstart/expr"
+
 	// Register code generators for the model plugin
-	//_ "goa.design/model/plugin"
-	_ "go_kickstart/plugin"
+	_ "goa.design/model/plugin"
 )
 
 // Design defines the architecture design containing the models and views.

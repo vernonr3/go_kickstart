@@ -34,7 +34,9 @@ type (
 		// Relationships is the set of relationships from this element to other
 		// elements.
 		Relationships []*Relationship `json:"relationships,omitempty"`
-
+		// interfaces within a struct expose external methods - and will get mocked up..
+		Interfaces []*Interface
+		// internal methods
 		Methods []*Method
 	}
 
@@ -56,7 +58,7 @@ type (
 		// Relationships is the set of relationships from this element to other
 		// elements.
 		Relationships []*Relationship `json:"relationships,omitempty"`
-
+		// these will be external methods - so coerce first letter to capitals
 		Methods []*Method
 	}
 	Method struct {

@@ -46,27 +46,15 @@ func createContainerFramework(cs []*expr.Container) []*Container {
 }
 
 func createComponentFramework(components []*expr.Component) string {
-	/*	var structTempls []string
-		var structMethodTempls [][]string
-		var methodSignatureTemplates [][]string
-	*/
 	var interfaceCodeStruct []gen.InterfaceCodeStruct
-	//var methodTemplates []string
-	//var structInterfaceTemplates [][]string
-	// create the segments
-
-	// load the template for component - the ComponentName will be the folder.
-	// the filename will be arbitrary for now... as the differentiation bu filename adds complexity for little gain..
-	// the expectation
-	// fill the template
-	// generate the code
-	//res := make([]*Component, len(cs))
-
 	//iterate over the number of components
 	for _, component := range components {
 		codeStruct := createStructFramework(component.Structs)
 		interfaceCodeStruct = createInterfaceFunctionalFramework(component.Interfaces)
-		gen.GenerateComponent(*component, codeStruct, interfaceCodeStruct)
+		functionStruct := createFuncFramework(component.Functions)
+		gen.GenerateComponent(*component, codeStruct, interfaceCodeStruct, functionStruct)
+		mockcodeStruct := createMockStructFramework(component.Structs)
+		gen.GenerateMockComponent(*component, mockcodeStruct)
 	}
 
 	return ""
@@ -81,20 +69,16 @@ func getMethodDescriptions(methods []*expr.Method) []string {
 	return Descriptions
 }
 
-func createStructFramework(structs []*expr.Struct) []gen.CodeStruct { // (structTempls []string, structMethodTempls [][]string, methodSignatureTempls [][]string, interfaceTempls [][]string) {
+func createStructFramework(structs []*expr.Struct) []gen.CodeStruct {
 	codestructs := make([]gen.CodeStruct, 0)
 	singlecodestruct := gen.CodeStruct{}
-	//methodTempls := make([][]string, len(structs))
-	//structTempls = make([]string, len(structs))
-	//structMethodTempls = make([][]string, len(structs))
-	//methodSignatureTempls = make([][]string, len(structs))
-	//interfaceTempl := make([]gen.InterfaceCodeStruct, len(structs))
 	// iterate over the number of structs
 	for _, mstruct := range structs {
 		//for each struct
 		interfaceTempl := createInterfaceFramework(mstruct, mstruct.Interfaces)
 		methodSignatureTempl, _ := createMethodSignatures(mstruct.Methods)
-		methodTempl := createMethodFramework(mstruct.Methods)
+		methodTempl := createStructMethodFramework(mstruct.Methods)
+		internalmethodTempl := createMethodFramework(mstruct.Methods)
 		structTempl := gen.GenerateStruct(*mstruct, methodSignatureTempl)
 		structMethodTempl := gen.GenerateStructMethods(*mstruct, getMethodDescriptions(mstruct.Methods), methodTempl)
 		// aggregate across all structs
@@ -102,7 +86,7 @@ func createStructFramework(structs []*expr.Struct) []gen.CodeStruct { // (struct
 		//singlecodestruct.MockStructTemplate = mockTempl
 		//singlecodestruct.ExternalMethods = methodSignatureTempl
 		singlecodestruct.InternalMethodSignatures = methodSignatureTempl
-		singlecodestruct.InternalMethods = methodTempl
+		singlecodestruct.InternalMethods = internalmethodTempl
 		singlecodestruct.StructMethods = structMethodTempl
 		singlecodestruct.InterfaceCodeStructs = interfaceTempl
 		//singlecodestruct.MockMethods = mockMethodTempl
@@ -112,12 +96,52 @@ func createStructFramework(structs []*expr.Struct) []gen.CodeStruct { // (struct
 	return codestructs
 }
 
+func createMockStructFramework(structs []*expr.Struct) []gen.MockCodeStruct {
+	codestructs := make([]gen.MockCodeStruct, 0)
+	singlecodestruct := gen.MockCodeStruct{}
+	// iterate over the number of structs
+	for _, mstruct := range structs {
+		// copy the structures so we don't change the original expr.Struct
+		interfaceTempl := createMockInterfaceFramework(mstruct, mstruct.Interfaces)
+		methodSignatureTempl, _ := createMockMethodSignatures(mstruct.Interfaces) // mstruct.Methods)
+		spoofmethodTempl := createSpoofMockMethods(mstruct, mstruct.Interfaces)
+		//		internalmethodTempl := createMethodFramework(mstruct.Methods)
+		structTempl := gen.GenerateMockStruct(*mstruct, methodSignatureTempl)
+		//		structMethodTempl := gen.GenerateStructMethods(*mstruct, getMethodDescriptions(mstruct.Methods), methodTempl)
+		// 		aggregate across all structs
+		singlecodestruct.MockStructTemplate = structTempl
+		singlecodestruct.MockMethods = spoofmethodTempl
+		//		singlecodestruct.InternalMethodSignatures = methodSignatureTempl
+		//		singlecodestruct.InternalMethods = internalmethodTempl
+		//		singlecodestruct.StructMethods = structMethodTempl
+		singlecodestruct.InterfaceCodeStructs = interfaceTempl
+		//		singlecodestruct.MockMethods = mockMethodTempl
+		codestructs = append(codestructs, singlecodestruct)
+	}
+
+	return codestructs
+}
+
+func createFuncFramework(functions []*expr.Function) []string {
+	funcTempls := make([]string, 0)
+	// iterate over the number of methods in this struct or interface
+	for _, function := range functions {
+		inputs := createInputParameterFramework(function.InputParameters)
+		returns := createReturnParameterFramework(function.ReturnParameters)
+		funcTempls = append(funcTempls, gen.GenerateFunction(*function, inputs, returns))
+	}
+	return funcTempls
+
+}
+
 func createInterfaceFunctionalFramework(compInterface []*expr.Interface) []gen.InterfaceCodeStruct {
 	interfaceMethodTempls := make([]gen.InterfaceCodeStruct, 0)
 	// iterate over the number of interfaces in this component
 	for _, minterface := range compInterface {
 		interfaceMethodTempl := gen.InterfaceCodeStruct{}
 		methodTempl := createMethodFramework(minterface.Methods)
+		_, methodRawSignatureTempl := createMethodSignatures(minterface.Methods) // i.e. without the body
+		interfaceMethodTempl.InterfaceSignature = gen.GenerateInterface(*minterface, methodRawSignatureTempl)
 		interfaceMethodTempl.ExternalFunctions = methodTempl
 		interfaceMethodTempls = append(interfaceMethodTempls, interfaceMethodTempl)
 	}
@@ -130,13 +154,31 @@ func createInterfaceFramework(mstruct *expr.Struct, interfaces []*expr.Interface
 	for _, minterface := range interfaces {
 		interfaceMethodTempl := gen.InterfaceCodeStruct{}
 		_, methodRawSignatureTempl := createMethodSignatures(minterface.Methods) // i.e. without the body
-		methodTempl := createMethodFramework(minterface.Methods)
+		methodTempl := createStructMethodFramework(minterface.Methods)
 		structMethodTempl := gen.GenerateStructMethods(*mstruct, getMethodDescriptions(minterface.Methods), methodTempl)
 		//methodTempls = append(methodTempls, methodTempl)
 		interfaceMethodTempl.StructTemplate = mstruct.Name
 		interfaceMethodTempl.ExternalMethods = structMethodTempl
 		fmt.Printf("%s has len %d external methods\n", interfaceMethodTempl.StructTemplate, len(interfaceMethodTempl.ExternalMethods))
 		interfaceMethodTempl.InterfaceSignature = gen.GenerateInterface(*minterface, methodRawSignatureTempl)
+		interfaceMethodTempls = append(interfaceMethodTempls, interfaceMethodTempl)
+	}
+	return interfaceMethodTempls
+}
+
+func createMockInterfaceFramework(mstruct *expr.Struct, interfaces []*expr.Interface) []gen.InterfaceCodeStruct {
+	interfaceMethodTempls := make([]gen.InterfaceCodeStruct, 0)
+	// iterate over the number of interfaces in this component
+	for _, minterface := range interfaces {
+		interfaceMethodTempl := gen.InterfaceCodeStruct{}
+		_, methodRawSignatureTempl := createMethodSignatures(minterface.Methods) // i.e. without the body
+		methodTempl := createMockStructMethodFramework(minterface.Methods)
+		structMethodTempl := gen.GenerateMockStructMethods(*mstruct, getMethodDescriptions(minterface.Methods), methodTempl)
+		//methodTempls = append(methodTempls, methodTempl)
+		interfaceMethodTempl.StructTemplate = mstruct.Name
+		interfaceMethodTempl.ExternalMethods = structMethodTempl
+		fmt.Printf("%s has len %d external methods\n", interfaceMethodTempl.StructTemplate, len(interfaceMethodTempl.ExternalMethods))
+		interfaceMethodTempl.InterfaceSignature = gen.GenerateMockInterface(*minterface, methodRawSignatureTempl)
 		interfaceMethodTempls = append(interfaceMethodTempls, interfaceMethodTempl)
 	}
 	return interfaceMethodTempls
@@ -155,6 +197,33 @@ func createMethodSignatures(methods []*expr.Method) ([]string, []string) {
 	return methodTemplSignatures, methodRawTemplSignatures
 }
 
+func createMockMethodSignatures(interfaces []*expr.Interface) ([]string, []string) {
+	methodTemplSignatures := make([]string, 0)
+	methodRawTemplSignatures := make([]string, 0)
+	// iterate over the number of methods in this struct or interface
+	for _, minterface := range interfaces {
+		for _, method := range minterface.Methods {
+			inputs := createInputParameterFramework(method.InputParameters)
+			returns := createReturnParameterFramework(method.ReturnParameters)
+			methodTemplSignatures = append(methodTemplSignatures, gen.GenerateMockMethodSignature(*method, inputs, returns))
+			methodRawTemplSignatures = append(methodRawTemplSignatures, gen.GenerateRawMethodSignature(*method, inputs, returns))
+		}
+	}
+	return methodTemplSignatures, methodRawTemplSignatures
+}
+
+func createSpoofMockMethods(mstruct *expr.Struct, interfaces []*expr.Interface) []string {
+	spoofmethods := make([]string, 0)
+	for _, minterface := range interfaces {
+		for _, method := range minterface.Methods {
+			inputs := createInputParameterFramework(method.InputParameters)
+			returns := createReturnParameterFramework(method.ReturnParameters)
+			spoofmethods = append(spoofmethods, gen.GenerateSpoofMethod(mstruct.Name, *method, inputs, returns))
+		}
+	}
+	return spoofmethods
+}
+
 func createMethodFramework(methods []*expr.Method) []string {
 	methodTempls := make([]string, 0)
 	// iterate over the number of methods in this struct or interface
@@ -166,9 +235,38 @@ func createMethodFramework(methods []*expr.Method) []string {
 	return methodTempls
 }
 
+func createStructMethodFramework(methods []*expr.Method) []string {
+	methodTempls := make([]string, 0)
+	// iterate over the number of methods in this struct or interface
+	for _, method := range methods {
+		inputs := createInputParameterFramework(method.InputParameters)
+		returns := createReturnParameterFramework(method.ReturnParameters)
+		methodTempls = append(methodTempls, gen.GenerateMethod4Struct(*method, inputs, returns))
+	}
+	return methodTempls
+}
+
+func createMockStructMethodFramework(methods []*expr.Method) []string {
+	methodTempls := make([]string, 0)
+	// iterate over the number of methods in this struct or interface
+	for _, method := range methods {
+		inputs := createInputFramework(method.InputParameters)
+		inputparams := createInputParameterFramework(method.InputParameters)
+		returnparams := createReturnParameterFramework(method.ReturnParameters)
+		methodTempls = append(methodTempls, gen.GenerateMockMethod4Struct(*method, inputs, inputparams, returnparams))
+	}
+	return methodTempls
+}
+
 func createInputParameterFramework(inputparameters []*expr.InputParameter) string {
 	var parameterlist string
 	parameterlist = gen.GenerateInputParameter(inputparameters)
+	return parameterlist
+}
+
+func createInputFramework(inputparameters []*expr.InputParameter) string {
+	var parameterlist string
+	parameterlist = gen.GenerateInputs(inputparameters)
 	return parameterlist
 }
 

@@ -4,8 +4,7 @@ import (
 	"strings"
 
 	"goa.design/goa/v3/eval"
-	//"goa.design/model/expr"
-	"go_kickstart/expr"
+	"goa.design/model/expr"
 )
 
 // Person defines a person (user, actor, role or persona).
