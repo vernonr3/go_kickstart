@@ -14,22 +14,36 @@ var _ = Design("Getting Started", "This is a model of vernon's software system."
 	SoftwareSystem("Software System", "Vernon's software system.", func() {
 		Container("KMContainer", "KM container with real content", "docker & golang", func() {
 			// can have Tag, URL, Uses, Delivers inside this
-			Component("KM component", "A custom component", "Go and Python", func() {
-				Struct("KM Struct", "A custom struct", "Go only", func() {
-					Method("KM method", "Means of introspection", "Go only", func() {
-						InputParameter("IVar1", "int64")
-						ReturnParameter("", "bool")
+			Component("KM_component", "A custom component", "Go and Python", func() {
+				Struct("KM_Struct", "A custom struct", "Go only", func() {
+					Interface("KM_Method Interface", "A custom interface", "Go only", func() {
+						Method("KM_struct_method", "Means of introspection", "Go only", func() {
+							InputParameter("IVar1", "int64")
+							ReturnParameter("bvalue", "bool")
+						})
 					})
-				})
-				Interface("KM Interface", "A custom interface", "Go only", func() {
-					Method("KM method", "Means of reflection", "Go only", func() {
-						InputParameter("Var1", "string")
-						ReturnParameter("retval", "bool")
+					Method("km_struct_internal_method", "Means of introspection", "Go only", func() {
+						InputParameter("intVar1", "int32")
+						ReturnParameter("cvalue", "int")
 					})
-				})
 
+				})
+				Interface("KM_Functional_Interface", "A custom interface", "Go only", func() {
+					Method("KM_Function", "Means of reflection", "Go only", func() {
+						InputParameter("Var1", "string")
+						ReturnParameter("dvalue", "int64")
+					})
+				})
 			})
 		})
 	})
 
 })
+
+/*
+	Method("km_struct_internal_method", "Means of introspection", "Go only", func() {
+		InputParameter("intVar1", "int32")
+		ReturnParameter("cvalue", "int")
+	})
+
+*/
